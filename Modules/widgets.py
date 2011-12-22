@@ -7,22 +7,26 @@
 #!/usr/bin/env python
 
 from Tkinter import *
-from MultiViewer import MVB
+#from MultiViewer import bg
 import os
 
+bg = 'black'
+fg = 'green'
+fontBig =  ("Arial",14,"bold")
 
-class ViewerButton(Button):
+
+class ViewerButton(Button,object):
     """ Standardized button options across viewer application"""
     def __init__(self,parent=None,**options):
         Button.__init__(self,parent,**options)
-        self.config(activebackground=MVB.fg,highlightthickness=0,
-                    bg=MVB.bg,fg=MVB.fg,relief=RAISED,bd=0)
+        self.config(activebackground=fg,highlightthickness=0,
+                    bg=bg,fg=fg,relief=RAISED,bd=0)
 
 
-class ViewerButtonBar(Frame,MVB):
+class ViewerButtonBar(Frame,object):
     """ Standardized button frame"""
     def __init__(self,parent=None):
-        Frame.__init__(self,parent,bg=MVB.bg)
+        Frame.__init__(self,parent,bg=bg)
 
     def addbuttons(self,**options):
         for key,value in self.ButtonDic.iteritems():
@@ -39,8 +43,10 @@ class LowerButtons(ViewerButtonBar):
                           'Load View': self.loadview}
         self.addbuttons(padx=10,pady=4)
 
+    def editviews(self,mvb):
+        mvb.editviews()
 
-class RadioViewBar(Frame,MVB):
+class RadioViewBar(Frame,object):
     def __init__(self,parent=None):
         Frame.__init__(self,parent,bg=MVB.bg)
         viewlist = os.listdir(MVB.savdir)
@@ -51,8 +57,8 @@ class RadioViewBar(Frame,MVB):
                                 underline=0,
                                 command=lambda view=view:self.loadview(view))
             radio.pack(anchor=W)
-            radio.config(activebackground=MVB.bg,selectcolor=MVB.bg,
-                         fg=MVB.fg,bg=MVB.bg,activeforeground=MVB.fg,
+            radio.config(activebackground=bg,selectcolor=bg,
+                         fg=fg,bg=bg,activeforeground=fg,
                          bd=0,highlightthickness=0)
 
 
@@ -61,7 +67,7 @@ class AddRemove(ViewerButtonBar):
         super(AddRemove, self).__init__(parent)
         self.ButtonDic = {'+': lambda: self.packviewer(1),
                           '-': lambda: self.unpackviewer(1)}
-        self.addbuttons(padx=20,pady=0,font=MVB.fontBig)
+        self.addbuttons(padx=20,pady=0,font=fontBig)
 
 
 

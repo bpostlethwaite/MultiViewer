@@ -15,6 +15,7 @@ Need to write summary
 
 *   Refresh after new save (add to radiobar on saving/changing new view)
 *   'Exit edit without save' does not restore original file when pressed.
+*   Change position of viewers.
 
 ### Change Log
 #### December 21, 2011

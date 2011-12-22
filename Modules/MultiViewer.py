@@ -11,9 +11,6 @@ from widgets import LowerButtons, RadioViewBar, AddRemove
 import os, os.path, pickle, subprocess
 
 bg = 'black'
-fg = 'green'
-fontBig =  ("Arial",14,"bold")
-
 
 class MaxViewersPacked(Exception):
     """For now just raises a max reached error, extend this later"""
@@ -24,10 +21,10 @@ class MinViewersUnpacked(Exception):
 
 
 class MVB(Frame,object):                                      # MVB = MultiViewerBase Class
-    def __init__(self,parent=None,showviewers=3,height=600,width=2000):
+    def __init__(self,parent=None,showviewers=3,height=800,width=2000):
         Frame.__init__(self,parent,bg=bg,width=width,height=height)
         self.viewers = []
-        self.panels = []                                         # keep track of button panels and radiobuttons etc
+        self.panels = {}                                         # keep track of button panels and radiobuttons etc
         self.packindex = 0                                       # Keeps track of which viewer has been packed
         self.maxviewers = 5
         self.bg = 'black'
@@ -36,10 +33,10 @@ class MVB(Frame,object):                                      # MVB = MultiViewe
         self.highfg = '#233DFD'
         self.titlecolor ='#272EF5' #'#1116B8' #beige
         self.fontBig =  ("Arial",14,"bold")
-        self.savdir = os.path.join(os.path.expanduser("~"),".ViewerBin")
+        self.savedir = os.path.join(os.path.expanduser("~"),".ViewerBin")
     # Make Save Directory if it does not exists
-        if not os.path.isdir(self.savdir):
-            os.mkdir(self.savdir)
+        if not os.path.isdir(self.savedir):
+            os.mkdir(self.savedir)
 
         self.showviewers = showviewers      #Set num of viewers shown
         self.buildframes()                  #Build structural Frames
@@ -47,6 +44,14 @@ class MVB(Frame,object):                                      # MVB = MultiViewe
         self.pack_propagate(False)
         self._initviewers()
 
+
+        self.LowerButtonDict = {'Edit in Emacs': self.editviews,
+                                'Save View': self.saveview,
+                                'Load View': self.loadview,
+                                'Delete View': self.deleteview}
+        
+        self.ARButtonDict = {'+': lambda: self.packviewer(1),
+                             '-': lambda: self.unpackviewer(1)}
         self.addbuttons()                       # Pack Buttons
         
         self.packviewer(self.showviewers)
@@ -60,7 +65,6 @@ class MVB(Frame,object):                                      # MVB = MultiViewe
                                            deepfg=self.deepfg,highfg=self.highfg,
                                            titlecolor=self.titlecolor,
                                            width = 30,file2view=None))
-            print repr(self.viewers[i])
 
     def buildframes(self):
         """Build major structural Frames"""
@@ -76,18 +80,17 @@ class MVB(Frame,object):                                      # MVB = MultiViewe
 
     def addbuttons(self):
         """Add Buttons to specifed location"""
-        self.panels.append(LowerButtons(self.bside,self))
-        self.panels[-1].pack(side=LEFT,fill=BOTH,expand=NO)
-        self.panels.append(AddRemove(self.bside))
-        self.panels[-1].pack(side=RIGHT,fill=BOTH,expand=NO)
-        self.panels.append(RadioViewBar(self.rside))
-        self.panels[-1].pack(side=RIGHT,fill=Y,expand=NO)
+        self.panels["LowerButtons"] = (LowerButtons(self.LowerButtonDict,self.bside))
+        self.panels["LowerButtons"].pack(side=LEFT,fill=BOTH,expand=NO)
+        self.panels["AddRemove"] = (AddRemove(self.ARButtonDict,self.bside))
+        self.panels["AddRemove"].pack(side=RIGHT,fill=BOTH,expand=NO)
+        self.panels["RadioViewBar"] = (RadioViewBar(self.savedir,self.loadview,self.rside))
+        self.panels["RadioViewBar"].pack(side=RIGHT,fill=Y,expand=NO)
 
 
 
     def packviewer(self,num2pack):
-        """Pack N viewers - up to maxviewers, then raise MaxViewersPacked Error"""
-        
+        """Pack N viewers - up to maxviewers, then raise MaxViewersPacked Error"""      
         for i in range(num2pack):
             if self.packindex <= self.maxviewers:
                 self.viewers[self.packindex].pack(side=LEFT,expand=1,fill=BOTH)
@@ -105,20 +108,21 @@ class MVB(Frame,object):                                      # MVB = MultiViewe
             else:
                 raise MinViewersUnpacked
                 break
-
-
-            
+         
     def saveview(self):
         """Create own widget eventually which asks for file name, and
         ensures that there the max num of saved views is not breached"""
         try:
-            viewname = asksaveasfilename(initialdir=self.savdir)
+            viewname = asksaveasfilename(initialdir=self.savedir)
         except IOError as err:
             viewname = None
         if viewname:
             viewfiles = [(self.viewers[i].viewfile) for i in range(self.packindex)]
             pickle.dump(viewfiles,open(viewname,"wb"))          # Pickle List
-            
+        # UPDATE RADIOVIEW BARS
+        self.refreshradiobuttons()
+
+
     def loadview(self,viewname=None):
         """Eventually create own widget that shows the list of saved views
         and allows user to select from list, perhaps a list of buttons"""
@@ -127,14 +131,14 @@ class MVB(Frame,object):                                      # MVB = MultiViewe
             # If there is not viewname given to function, we presume we are dealing with a fresh load button
             # Thus we ask user for file to load, go to initial savebin directory first
             try:
-                viewname = askopenfilename(initialdir=self.savdir)
+                viewname = askopenfilename(initialdir=self.savedir)
             except IOError as err:
                 viewname = None
                 
         else:
             # Most cases this will be called by radio button and the like, thus will have a viewname
             # Passed into the function, in this case we set viewname as full path name.
-            viewname = os.path.join(self.savdir,viewname)
+            viewname = os.path.join(self.savedir,viewname)
         
         if viewname:
             viewfiles = pickle.load(open(viewname))             # Load up viewfile list
@@ -142,6 +146,25 @@ class MVB(Frame,object):                                      # MVB = MultiViewe
             for viewer,viewfile in zip(self.viewers,viewfiles):  #Zip loaded viewfile together with a viewer
                 viewer.viewfile = viewfile                      # Set the new viewfile (runs property set)
             self.packviewer(len(viewfiles)-1)                     # Repack views = to number of views in viewfile (-1 since we have 1 loaded all ready)
+
+    def deleteview(self):
+        # Find what RadioButton index we are on
+        # Reload the viewlist and correlate the index with the view
+        # Delete the corrisponding viewname and refresh the radiobuttons.
+
+        deleteindex = self.panels["RadioViewBar"].v.get() #Get index of current radiobutton
+        viewlist = os.listdir(self.savedir)    #Get list of saved views
+        for index,view in enumerate(sorted(viewlist)): # Enumerate alphabetically, just like radiobutton outlay
+            if index == deleteindex:   #Match the two indices
+                viewname = os.path.join(self.savedir,view)    # Get full path
+                print "we will delete view: ", viewname   # Not yet implemented
+                print "But feature not yet implemented until safeguards are in place"
+        self.refreshradiobuttons()   # Refresh the radiobutton bar.
+
+    def refreshradiobuttons(self):
+        self.panels["RadioViewBar"].pack_forget() # Unpack
+        self.panels["RadioViewBar"] = (RadioViewBar(self.savedir,self.loadview,self.rside)) # Reload
+        self.panels["RadioViewBar"].pack(side=RIGHT,fill=Y,expand=NO) # Repack
             
     def editviews(self):
         viewfiles = [(self.viewers[i].viewfile) for i in range(self.packindex) if self.viewers[i].viewfile is not None]

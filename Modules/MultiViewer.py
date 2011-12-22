@@ -22,6 +22,9 @@ class MinViewersUnpacked(Exception):
 
 class MVB(object):                                      # MVB = MultiViewerBase Class
     viewers = []
+    panels = []                                         # keep track of button panels and radiobuttons etc
+
+
     packindex = 0                                       # Keeps track of which viewer has been packed
     maxviewers = 5
     bg = 'black'
@@ -56,6 +59,7 @@ class MVB(object):                                      # MVB = MultiViewerBase 
             else:
                 raise MinViewersUnpacked
                 break
+
 
             
     def saveview(self):
@@ -99,8 +103,7 @@ class MVB(object):                                      # MVB = MultiViewerBase 
             subprocess.Popen('emacs -geometry 140x60 {}'.format(' '.join(viewfiles)), shell=True)
         
         
-        
-    
+            
         
             
     

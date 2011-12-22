@@ -18,7 +18,6 @@ class MultiViewerMain(Frame,MVB):
         Frame.__init__(self,parent,bg=MVB.bg,width=width,height=height)
         self.showviewers = showviewers      #Set num of viewers shown
         self.buildframes()                  #Build structural Frames
-        self.panels = []
         self.pack(fill=BOTH,expand=YES)
         self.pack_propagate(False)
         self._initviewers()
@@ -46,14 +45,18 @@ class MultiViewerMain(Frame,MVB):
         self.bside = Frame(self,bg=MVB.bg)
         self.bside.pack(side=BOTTOM,fill=X,expand=NO)
   
+    
+    def shout(self):
+        print "Holy Jesus this is MultiViewerMain!"
+
     def addbuttons(self):
         """Add Buttons to specifed location"""
-        self.panels.append(LowerButtons(self.bside))
-        self.panels[-1].pack(side=LEFT,fill=BOTH,expand=NO)
-        self.panels.append(AddRemove(self.bside))
-        self.panels[-1].pack(side=RIGHT,fill=BOTH,expand=NO)
-        self.panels.append(RadioViewBar(self.rside))
-        self.panels[-1].pack(side=RIGHT,fill=Y,expand=NO)
+        MVB.panels.append(LowerButtons(self.bside))
+        MVB.panels[-1].pack(side=LEFT,fill=BOTH,expand=NO)
+        MVB.panels.append(AddRemove(self.bside))
+        MVB.panels[-1].pack(side=RIGHT,fill=BOTH,expand=NO)
+        MVB.panels.append(RadioViewBar(self.rside))
+        MVB.panels[-1].pack(side=RIGHT,fill=Y,expand=NO)
             
 
 if __name__ == '__main__':

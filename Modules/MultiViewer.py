@@ -53,9 +53,29 @@ class MVB(Frame,object):                                      # MVB = MultiViewe
         self.ARButtonDict = {'+': lambda: self.packviewer(1),
                              '-': lambda: self.unpackviewer(1)}
         self.addbuttons()                       # Pack Buttons
-        
         self.packviewer(self.showviewers)
 
+#        self.bind("<Alt-KeyPress-{}>".format(1), self.radiokey)
+
+
+        self.focus_set()
+
+######## Assign Event handlers to specific keypresses ##################
+# Bind a number plus mod1 key for each radiobutton number. Remember the 
+# Radio buttons actually start at zero, so we need to subtract 1 before
+# setting the radiobutton IntVar
+
+        [self.bind("<Alt-KeyPress-{}>".format(i+1), self.radiokey)
+         for i in range( int(self.panels["RadioViewBar"].index) )]
+                     
+
+    def radiokey(self,event):    
+        self.focus_force()
+        rad = int(event.keysym) - 1
+        #self.panels["RadioViewBar"].v.set(rad)
+        self.panels["RadioViewBar"].rads[rad].invoke()
+
+#########################################################################    
 
     def _initviewers(self):
         """ Initializes Viewers for max viewers allowed by app, set in MultiViewerBase"""
@@ -76,7 +96,8 @@ class MVB(Frame,object):                                      # MVB = MultiViewe
   
     
     def shout(self):
-        print "Holy Jesus this is MultiViewerMain!"
+        print "Holy Jesus this is MultiViewer!"
+
 
     def addbuttons(self):
         """Add Buttons to specifed location"""
@@ -84,9 +105,8 @@ class MVB(Frame,object):                                      # MVB = MultiViewe
         self.panels["LowerButtons"].pack(side=LEFT,fill=BOTH,expand=NO)
         self.panels["AddRemove"] = (AddRemove(self.ARButtonDict,self.bside))
         self.panels["AddRemove"].pack(side=RIGHT,fill=BOTH,expand=NO)
-        self.panels["RadioViewBar"] = (RadioViewBar(self.savedir,self.loadview,self.rside))
+        self.panels["RadioViewBar"] = RadioViewBar(self.savedir,self.loadview,self.rside)
         self.panels["RadioViewBar"].pack(side=RIGHT,fill=Y,expand=NO)
-
 
 
     def packviewer(self,num2pack):

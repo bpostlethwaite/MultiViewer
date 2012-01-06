@@ -20,3 +20,6 @@ Need to write summary
 ### Change Log
 #### December 21, 2011
 *   added README.md
+
+#### January 5th, 2012
+*   Added alt-num keyboard shortcuts to the radiobuttons. 

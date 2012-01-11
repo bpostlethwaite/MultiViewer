@@ -54,21 +54,18 @@ class MVB(Frame,object):                                      # MVB = MultiViewe
                              '-': lambda: self.unpackviewer(1)}
         self.addbuttons()                       # Pack Buttons
         self.packviewer(self.showviewers)
-
-#        self.bind("<Alt-KeyPress-{}>".format(1), self.radiokey)
-
-
+        self.radiokeybind()
         self.focus_set()
 
 ######## Assign Event handlers to specific keypresses ##################
 # Bind a number plus mod1 key for each radiobutton number. Remember the 
 # Radio buttons actually start at zero, so we need to subtract 1 before
 # setting the radiobutton IntVar
-
+#######################################################################
+    def radiokeybind(self):
         [self.bind("<Alt-KeyPress-{}>".format(i+1), self.radiokey)
          for i in range( int(self.panels["RadioViewBar"].index) )]
                      
-
     def radiokey(self,event):    
         self.focus_force()
         rad = int(event.keysym) - 1
@@ -76,7 +73,8 @@ class MVB(Frame,object):                                      # MVB = MultiViewe
         self.panels["RadioViewBar"].rads[rad].invoke()
 
 #########################################################################    
-
+# Initialize, build framework, add buttons.
+#########################################################################
     def _initviewers(self):
         """ Initializes Viewers for max viewers allowed by app, set in MultiViewerBase"""
         for i in range(self.maxviewers):
@@ -107,8 +105,9 @@ class MVB(Frame,object):                                      # MVB = MultiViewe
         self.panels["AddRemove"].pack(side=RIGHT,fill=BOTH,expand=NO)
         self.panels["RadioViewBar"] = RadioViewBar(self.savedir,self.loadview,self.rside)
         self.panels["RadioViewBar"].pack(side=RIGHT,fill=Y,expand=NO)
-
-
+#########################################################################################
+# Pack and Unpack Viewers
+#########################################################################################
     def packviewer(self,num2pack):
         """Pack N viewers - up to maxviewers, then raise MaxViewersPacked Error"""      
         for i in range(num2pack):
@@ -128,7 +127,9 @@ class MVB(Frame,object):                                      # MVB = MultiViewe
             else:
                 raise MinViewersUnpacked
                 break
-         
+#########################################################################################
+# Save, Load, Delete and edit Views
+#########################################################################################         
     def saveview(self):
         """Create own widget eventually which asks for file name, and
         ensures that there the max num of saved views is not breached"""
@@ -140,7 +141,7 @@ class MVB(Frame,object):                                      # MVB = MultiViewe
             viewfiles = [(self.viewers[i].viewfile) for i in range(self.packindex)]
             pickle.dump(viewfiles,open(viewname,"wb"))          # Pickle List
         # UPDATE RADIOVIEW BARS
-        self.refreshradiobuttons()
+        self.refresh()
 
 
     def loadview(self,viewname=None):
@@ -181,17 +182,19 @@ class MVB(Frame,object):                                      # MVB = MultiViewe
                 print "But feature not yet implemented until safeguards are in place"
         self.refreshradiobuttons()   # Refresh the radiobutton bar.
 
-    def refreshradiobuttons(self):
-        self.panels["RadioViewBar"].pack_forget() # Unpack
-        self.panels["RadioViewBar"] = (RadioViewBar(self.savedir,self.loadview,self.rside)) # Reload
-        self.panels["RadioViewBar"].pack(side=RIGHT,fill=Y,expand=NO) # Repack
-            
     def editviews(self):
-        viewfiles = [(self.viewers[i].viewfile) for i in range(self.packindex) if self.viewers[i].viewfile is not None]
+        viewfiles = [(self.viewers[i].viewfile) for i in range(self.packindex) 
+                     if self.viewers[i].viewfile is not None]
         if viewfiles:
             subprocess.Popen('emacs -geometry 140x60 {}'.format(' '.join(viewfiles)), shell=True)
-        
-        
+###################################################################################################        
+# Refresh the application after modification.
+###################################################################################################
+    def refresh(self):
+        self.panels["RadioViewBar"].pack_forget() # Unpack
+        self.panels["RadioViewBar"] = RadioViewBar(self.savedir,self.loadview,self.rside) # Reload
+        self.panels["RadioViewBar"].pack(side=RIGHT,fill=Y,expand=NO) # Repack
+        self.radiokeybind()
             
         
             

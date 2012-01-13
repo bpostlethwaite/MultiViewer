@@ -48,9 +48,11 @@ class RadioViewBar(Frame,object):
         viewlist = os.listdir(savedir)
         self.rads = []
         self.v = IntVar()
-                
+        self.index = 0
+
         # We do text = ... index + 1, so that the number of the radiobutton starts at 1 not zero.
         for index,view in enumerate(sorted(viewlist)):
+            print "I have an index!"
             radio = Radiobutton(self,text=str(index + 1) + ".) " + view,variable=self.v,value=(index+1),
                                 underline=0,
                                 command=lambda view=view:loadview(view))
@@ -58,9 +60,8 @@ class RadioViewBar(Frame,object):
             radio.config(activebackground=bg,selectcolor=bg,
                          fg=fg,bg=bg,activeforeground=fg,
                          bd=0,highlightthickness=0)
-            self.rads.append(radio)
-        
-        self.index = index + 1
+            self.rads.append(radio)        
+            self.index += 1
 
 
 class AddRemove(ViewerButtonBar):

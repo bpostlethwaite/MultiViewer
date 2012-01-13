@@ -19,8 +19,15 @@ Need to write summary
 * Change name of some classes.
 
 ### Change Log
-#### December 21, 2011
-* added README.md
+
+#### January 12th, 2012
+* Fixed a bug that resulted in program errors if their was no pre-existing
+  viewerbin file with saved views. 
+* Still may be a bug in this case, the radioviewer bar does not appear until
+  there are views saved... though this may be functionality.
+
+#### January 5th, 2012
+* Added alt-num keyboard shortcuts to the radiobuttons. 
 
 #### Unknown Date, 2011
 * Totally Changed the namespace structure of the program.
@@ -35,5 +42,7 @@ Need to write summary
   about calling `invoke()` on the radiobutton in question, this
   may simpify the script somewhat.
 
-#### January 5th, 2012
-* Added alt-num keyboard shortcuts to the radiobuttons. 
+#### December 21, 2011
+* added README.md
+
+

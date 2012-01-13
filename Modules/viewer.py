@@ -183,6 +183,8 @@ class FileViewer(Frame,object):
                 print err
         else:
             try:
+                #vf = asksaveasfilename(initialdir=os.path.expanduser("~"));
+                # initial directory?
                 vf = asksaveasfilename(initialdir=os.path.expanduser("~"));
                 print "writing", self.txt, vf
                 V = open(vf,'w')

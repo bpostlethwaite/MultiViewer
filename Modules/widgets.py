@@ -7,61 +7,68 @@
 #!/usr/bin/env python
 
 from Tkinter import *
-from MultiViewer import MVB
+#from MultiViewer import bg
 import os
 
+bg = 'black'
+fg = 'green'
+fontBig =  ("Arial",14,"bold")
 
-class ViewerButton(Button):
+
+class ViewerButton(Button,object):
     """ Standardized button options across viewer application"""
     def __init__(self,parent=None,**options):
         Button.__init__(self,parent,**options)
-        self.config(activebackground=MVB.fg,highlightthickness=0,
-                    bg=MVB.bg,fg=MVB.fg,relief=RAISED,bd=0)
+        self.config(activebackground=fg,highlightthickness=0,
+                    bg=bg,fg=fg,relief=RAISED,bd=0)
 
 
-class ViewerButtonBar(Frame,MVB):
+class ViewerButtonBar(Frame,object):
     """ Standardized button frame"""
-    def __init__(self,parent=None):
-        Frame.__init__(self,parent,bg=MVB.bg)
+    def __init__(self,buttonDict,parent=None):
+        Frame.__init__(self,parent,bg=bg)
 
     def addbuttons(self,**options):
-        for key,value in self.ButtonDic.iteritems():
-            button = ViewerButton(self,text=key,command=value)
+        for text,command in self.buttonDict.iteritems():
+            button = ViewerButton(self,text=text,command=command)
             button.pack(side=LEFT,anchor=CENTER)
             button.config(**options)
 
 
 class LowerButtons(ViewerButtonBar):
-    def __init__(self,parent=None):
-        super(LowerButtons, self).__init__(parent)
-        self.ButtonDic = {'Edit in Emacs': self.editviews,
-                          'Save View': self.saveview,
-                          'Load View': self.loadview}
+    def __init__(self,buttonDict,parent=None):
+        super(LowerButtons, self).__init__(buttonDict,parent)
+        self.buttonDict = buttonDict
         self.addbuttons(padx=10,pady=4)
 
 
-class RadioViewBar(Frame,MVB):
-    def __init__(self,parent=None):
-        Frame.__init__(self,parent,bg=MVB.bg)
-        viewlist = os.listdir(MVB.savdir)
-        v = IntVar()
-        v = 99
+class RadioViewBar(Frame,object):
+    def __init__(self,savedir,loadview,parent=None):
+        Frame.__init__(self,parent,bg=bg)
+        viewlist = os.listdir(savedir)
+        self.rads = []
+        self.v = IntVar()
+        self.index = 0
+
+        # We do text = ... index + 1, so that the number of the radiobutton starts at 1 not zero.
         for index,view in enumerate(sorted(viewlist)):
-            radio = Radiobutton(self,text=view,variable=v,value=index,
+            print "I have an index!"
+            radio = Radiobutton(self,text=str(index + 1) + ".) " + view,variable=self.v,value=(index+1),
                                 underline=0,
-                                command=lambda view=view:self.loadview(view))
+                                command=lambda view=view:loadview(view))
             radio.pack(anchor=W)
-            radio.config(activebackground=MVB.bg,selectcolor=MVB.bg,
-                         fg=MVB.fg,bg=MVB.bg,activeforeground=MVB.fg,
+            radio.config(activebackground=bg,selectcolor=bg,
+                         fg=fg,bg=bg,activeforeground=fg,
                          bd=0,highlightthickness=0)
+            self.rads.append(radio)        
+            self.index += 1
 
 
 class AddRemove(ViewerButtonBar):
-    def __init__(self,parent=None):
-        super(AddRemove, self).__init__(parent)
-        self.ButtonDic = {'+': lambda: self.packviewer(1),
-                          '-': lambda: self.unpackviewer(1)}
-        self.addbuttons(padx=20,pady=0,font=MVB.fontBig)
+    def __init__(self,buttonDict,parent=None):
+        super(AddRemove, self).__init__(buttonDict,parent)
+        self.buttonDict = buttonDict
+        self.addbuttons(padx=20,pady=0,font=fontBig)
 
 
 
